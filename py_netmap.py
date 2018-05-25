@@ -1,7 +1,7 @@
 import itertools
 from scapy.all import *
-import libnmap
-from libnmap.process import NmapProcess
+#import libnmap
+#from libnmap.process import NmapProcess
 
 ##https://libnmap.readthedocs.io/en/latest/process.html
 ##https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
@@ -9,9 +9,8 @@ from libnmap.process import NmapProcess
 ## IP list creation
 def ip_range(input_string):
     octets = input_string.split('.')
-    chunks = [map(int, octet.split('-')) for octet in octets]
-    ranges = [range(c[0], c[1] + 1) if len(c) == 2 else c for c in chunks]
-
+    chunks = [list(octet.split('-')) for octet in octets]
+    ranges = [range(int(c[0]), int(c[1]) + 1) if len(c) == 2 else c for c in chunks]
     for address in itertools.product(*ranges):
         yield '.'.join(map(str, address))
 
