@@ -7,7 +7,7 @@ from scapy.all import *
 ##https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 
 ## IP list creation
-## edited for Python 3 support.
+## edited for better Python 3 support.
 
 conf.verb=0
 def ip_range(input_string):
@@ -19,7 +19,7 @@ def ip_range(input_string):
         yield '.'.join(map(str, address))
 
 #edited from: https://jvns.ca/blog/2013/10/31/day-20-scapy-and-traceroute/
-#Changed to timeout , and not break when reply is NONE
+#Changed to add timeout , and not break when reply is NONE
 def trace_route(host):
 	if conf.verb != 0: #Squash output.
 		conf.verb=0
@@ -51,25 +51,27 @@ def icmp_discovery(hosts):
 	target_discovered=False #Trace_route() when host a target is found, but only for FIRST.
 	ipup=[] # record who is up
 	ipdown=[] # record which IPs are down
-	trace =[]
+	trace =[] # store trace_route()
 	for i in hosts:
+		print("Checking", i)
 		packet = IP(dst=i, ttl=128)/ICMP() #ICMP style ping.
 		reply = sr1(packet, timeout=2)
-	if not (reply is None):
-		if target_discovered == False:
-			target_discovered = True
-			print(reply.dst, "is up")
-			ipup.append(i)
-			trace = trace_route(i)
-		else: 
-			ipup.append(i)
-	else:
-		ipdown.append(i)
+		if not (reply is None):
+			if target_discovered == False:
+				target_discovered = True
+				print(reply.dst, "is up")
+				ipup.append(i)
+				trace = trace_route(i)
+			else: 
+				ipup.append(i)
+		else:
+			ipdown.append(i)
 	return ipup, ipdown, trace
 
 
 #for i in ip_range("192.168.1-2.1-255"):
 #	print(i)
 #print(icmp_discovery(["8.8.8.8"]))
-t=trace_route("8.8.8.8")
+ip = [i for i in ip_range("172.16.100.1-254")]
+t=icmp_discovery(ip)
 print(t)
