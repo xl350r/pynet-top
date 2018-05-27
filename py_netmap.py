@@ -66,7 +66,7 @@ def icmp_discovery(hosts):
 	trace =[] # store trace_route()
 	for i in hosts:
 		print("Checking", i)
-		packet = IP(dst=i, ttl=128)/ICMP() #ICMP style ping.
+		packet = IP(dst=i, ttl=default_ttl)/ICMP() #ICMP style ping.
 		reply = sr1(packet, timeout=1)
 		if not (reply is None):
 			if target_discovered == False:
@@ -84,6 +84,6 @@ def icmp_discovery(hosts):
 #for i in ip_range("192.168.1-2.1-255"):
 #	print(i)
 #print(icmp_discovery(["8.8.8.8"]))
-ip = [i for i in ip_range("8.8.6-8.6-8")]
+ip = [i for i in ip_range("8.8.8.6-8")]
 t=icmp_discovery(ip)
 print(t)
