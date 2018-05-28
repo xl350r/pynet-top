@@ -11,12 +11,12 @@ i = [for i in ip_range("192.168.1-2.4-20")]
 ```
 
 
-## trace_route()
-At the moment increments ttl value until It reaches target, First with unix style UDP upon that failing attempts ICMP (windows style).
+## trace()
+At the moment increments ttl value until It reaches target, First with unix style UDP upon that failing attempts ICMP (windows style), upon that failing try tcp.
 
 usage:
 ```
-trace_route("8.8.8.8")
+trace("8.8.8.8")
 ```
 
 ## icmp_discovery()
