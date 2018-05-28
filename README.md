@@ -1,6 +1,7 @@
 # pynet-top
 
 A set of functions for CNA python course.
+Uses scapy and itertools.
 
 ## ip_range()
 used to generate an iterable range of ip addresses. Found the original code on a stack overflow forum, but had to adjust it so it would stop breaking in python3.
