@@ -17,6 +17,7 @@ usage:
 ## icmp_discovery()
 
 Meant to be used in conjunction with ip_range() and trace_route() if iterates across a list until it pings a discoverable host then calls trace_route() to find a path to the first discovered target. Then pings the rest on said list if any remain. It then returns the targets that replied, the ones that didn't, and the trace (ipup, ipdown, trace) as lists.
+usage:
 `ip = [for i in ip_range("192.168.1-2.4-20")]
 t=icmp_discovery(ip)
 print(t[0], " Are up.")`
