@@ -24,25 +24,29 @@ class Pynettop:
 
 	def trace(self, host):
 		ar = []
-		for i in range(1, self.default_ttl+1):
-			reply,src=self.test_udp(host, i)
-			if reply is None:
+		for i in range(1, self.default_ttl+1): #check each hop to target
+			reply,src=self.test_udp(host, i) 
+			if reply is None: # if no response test_icmp()
 				reply, src = self.test_icmp(host, i)
-				if reply is None: 
+				if reply is None: # if no response test_tcp()
 					reply, src = self.test_tcp(host, i)
-					if reply is None:
+					if reply is None:# if still no response append "*"
 						ar.append("*")
-					elif not (reply is None):
+					elif not (reply is None): # tcp has no reply type so if response received target MUST be up.
 						ar.append(src)
-					else:
+						if src == host:
+							break # to prevent infinite loops.
+						else:
+							next
+					else: # how the f*ck would you get here?
 						ar.append("Error")
-				elif reply == 0:
+				elif reply == 0: # ICMP target reached code
 					ar.append(src)
 					break
 				else:
 					ar.append(src)
 					next
-			elif reply == 3:
+			elif reply == 3: # UDP target reached code.
 				ar.append(src)
 				break
 			else: 
@@ -52,14 +56,14 @@ class Pynettop:
 
 
 	def test_udp(self, host, ttl):
-		pkt = IP(dst=host, ttl=ttl)/UDP(dport=33434)
+		pkt = IP(dst=host, ttl=ttl)/UDP(dport=33434) # Unix style
 		reply = sr1(pkt, verbose=0, timeout=5)
 		if reply is None:
 			return None, None
 		else:
 			return reply.type, reply.src
 
-	def test_icmp(self, host, ttl):
+	def test_icmp(self, host, ttl): # windows style
 		pkt = IP(dst = host, ttl=ttl)/ICMP()
 		reply = sr1(pkt, verbose=0, timeout=5)
 		if reply is None:
@@ -67,8 +71,8 @@ class Pynettop:
 		else:
 			return reply.type, reply.src
 
-	def test_tcp(self, host, ttl):
-		ports=[20,21,22,53,80,443,8080]
+	def test_tcp(self, host, ttl): # tcp style
+		ports=[20,21,22,53,80,443,8080] # common tcp ports. at least one NEEDS to be open to respond.
 		for i in ports:
 			pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
 			reply = sr1(pkt, verbose=0, timeout=5)
@@ -86,10 +90,10 @@ class Pynettop:
 	def icmp_discovery(self, hosts):
 		if conf.verb != 0:
 			conf.verb=0
-		target_discovered=False #Trace_route() when host a target is found, but only for FIRST.
+		target_discovered=False #trace() when host a target is found, but only for FIRST.
 		ipup=[] # record who is up
 		ipdown=[] # record which IPs are down
-		trace =[] # store trace_route()
+		trace =[] # store trace()
 		for i in hosts:
 			print("Checking", i)
 			packet = IP(dst=i, ttl=self.default_ttl) / ICMP() #ICMP style ping.
