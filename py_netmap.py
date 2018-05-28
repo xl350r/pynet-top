@@ -38,7 +38,7 @@ def trace_route(host):
 				next
 			elif reply.type == 0: #ICMP target reached reply type 
 				ar.append(reply.src)
-				print("ICMP",i, reply.src)
+				print(i, reply.src)
 				break
 			else:
 				ar.append(reply.src)
@@ -46,7 +46,7 @@ def trace_route(host):
 				next
 		elif reply.type == 3: #UDP target reached reply type
 			# destination
-			print("UDP", i, reply.src)
+			print(i, reply.src)
 			ar.append(reply.src)
 			break
 		else:
@@ -85,6 +85,6 @@ def icmp_discovery(hosts):
 #	print(i)
 #print(icmp_discovery(["8.8.8.8"]))
 #ip = [i for i in ip_range("8.8.8.6-8")]
-ip = [i for i in ip_range("192.124.249.2")]
+ip = [i for i in ip_range("8.8.8.6-8")]
 t=icmp_discovery(ip)
 print(t)
