@@ -20,4 +20,4 @@ Meant to be used in conjunction with ip_range() and trace_route() if iterates ac
 usage:
 ```ip = [for i in ip_range("192.168.1-2.4-20")]
 t=icmp_discovery(ip)
-print(t[0], " Are up.")```
+print(t[0], " Are up.") ```
