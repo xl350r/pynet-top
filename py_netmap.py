@@ -5,13 +5,11 @@ from scapy.all import *
 
 ## https://libnmap.readthedocs.io/en/latest/process.html
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
-
-## IP list creation
-## edited for better Python 3 support.
 default_ttl=32
 conf.verb=0
 
-
+## IP list creation
+## edited for better Python 3 support
 def ip_range(input_string):
 	octets = input_string.split('.')
 	chunks = [list(octet.split('-')) for octet in octets]
@@ -38,22 +36,24 @@ def trace_route(host):
 				ar.append("*") 
 				print(i, " NONE")
 				next
-			elif reply.type == 3:
+			elif reply.type == 0: #ICMP target reached reply type 
 				ar.append(reply.src)
-				print(i, reply.src)
+				print("ICMP",i, reply.src)
 				break
 			else:
 				ar.append(reply.src)
 				print(i, reply.src)
-		elif reply.type == 3:
+				next
+		elif reply.type == 3: #UDP target reached reply type
 			# destination
-			print(i, reply.src)
+			print("UDP", i, reply.src)
 			ar.append(reply.src)
 			break
 		else:
 			# middle hop
 			ar.append(reply.src)
 			print(i, reply.src)
+			next
 	return ar
 
 
@@ -66,7 +66,7 @@ def icmp_discovery(hosts):
 	trace =[] # store trace_route()
 	for i in hosts:
 		print("Checking", i)
-		packet = IP(dst=i, ttl=default_ttl)/ICMP() #ICMP style ping.
+		packet = IP(dst=i, ttl=default_ttl) / ICMP() #ICMP style ping.
 		reply = sr1(packet, timeout=1)
 		if not (reply is None):
 			if target_discovered == False:
@@ -84,6 +84,7 @@ def icmp_discovery(hosts):
 #for i in ip_range("192.168.1-2.1-255"):
 #	print(i)
 #print(icmp_discovery(["8.8.8.8"]))
-ip = [i for i in ip_range("8.8.8.6-8")]
+#ip = [i for i in ip_range("8.8.8.6-8")]
+ip = [i for i in ip_range("192.124.249.2")]
 t=icmp_discovery(ip)
 print(t)
