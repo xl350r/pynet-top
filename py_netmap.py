@@ -1,13 +1,8 @@
 import itertools
 from scapy.all import *
-#import libnmap
-#from libnmap.process import NmapProcess
 
-## https://libnmap.readthedocs.io/en/latest/process.html
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
-	#default_ttl=32
-	#conf.verb=0
 	def __init__(self, host):
 		self.default_ttl=32
 		ip = [i for i in self.ip_range(host)]
@@ -82,11 +77,8 @@ class Pynettop:
 				return None, None
 			else:
 				next
-
 	#edited from: https://jvns.ca/blog/2013/10/31/day-20-scapy-and-traceroute/
 	#Changed to add timeout , and not break when reply is NONE
-
-
 	def icmp_discovery(self, hosts):
 		if conf.verb != 0:
 			conf.verb=0
@@ -111,4 +103,5 @@ class Pynettop:
 		return ipup, ipdown, trace
 
 test = Pynettop("8.8.8.8")
-print(test.i)
+ipup,ipdown,trace=test.i
+print(ipup,ipdown,trace)
