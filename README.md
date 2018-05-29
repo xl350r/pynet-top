@@ -9,7 +9,6 @@ usage:
 ```
 test=Pynettop("8.8.8.6-8")
 print(test.i)
-
 ```
 ## ip_range()
 used to generate an iterable range of ip addresses. Found the original code on a stack overflow forum, but had to adjust it so it would stop breaking in python3.
