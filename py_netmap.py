@@ -3,8 +3,9 @@ from scapy.all import *
 
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
-	def __init__(self, host):
-		self.default_ttl=32
+	def __init__(self, host,time=2, ttl=32):
+		self.default_ttl=ttl
+		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
 		self.i=self.icmp_discovery(ip)
 	## IP list creation
@@ -52,7 +53,7 @@ class Pynettop:
 
 	def test_udp(self, host, ttl):
 		pkt = IP(dst=host, ttl=ttl)/UDP(dport=33434) # Unix style
-		reply = sr1(pkt, verbose=0, timeout=5)
+		reply = sr1(pkt, verbose=0, timeout=self.timeout)
 		if reply is None:
 			return None, None
 		else:
@@ -60,7 +61,7 @@ class Pynettop:
 
 	def test_icmp(self, host, ttl): # windows style
 		pkt = IP(dst = host, ttl=ttl)/ICMP()
-		reply = sr1(pkt, verbose=0, timeout=5)
+		reply = sr1(pkt, verbose=0, timeout=self.timeout)
 		if reply is None:
 			return None, None
 		else:
@@ -70,7 +71,7 @@ class Pynettop:
 		ports=[20,21,22,53,80,443,8080] # common tcp ports. at least one NEEDS to be open to respond.
 		for i in ports:
 			pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
-			reply = sr1(pkt, verbose=0, timeout=5)
+			reply = sr1(pkt, verbose=0, timeout=self.timeout)
 			if not (reply is None):
 				return True, reply.src
 			elif i == ports[-1]:
@@ -101,6 +102,7 @@ class Pynettop:
 			else:
 				ipdown.append(i)
 		return ipup, ipdown, trace
+
 
 test = Pynettop("8.8.8.8")
 ipup,ipdown,trace=test.i
