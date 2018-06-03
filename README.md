@@ -35,3 +35,6 @@ ip = [for i in ip_range("192.168.1-2.4-20")]
 t=icmp_discovery(ip)
 print(t[0], " Are up.")
 ```
+
+## port_scanner()
+as name describes, has a default list of ports it scans. Returns dict of {host: open_ports}.
