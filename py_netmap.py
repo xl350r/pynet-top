@@ -3,7 +3,7 @@ from scapy.all import *
 
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
-	def __init__(self, host,time=2, ttl=32):
+	def __init__(self, host, time=0.1, ttl=32): # time=0.1 0.1 ~= 100ms
 		self.default_ttl=ttl
 		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
@@ -78,6 +78,24 @@ class Pynettop:
 				return None, None
 			else:
 				next
+
+	def port_scanner(self, hosts, ports=[20,21,22,53,80,443,8080], time=0.5, ttl=64):
+		HostPort_dict=dict() #Init variable to store results
+		for host in hosts:
+			HostPort_dict[host]=[] # create blank dict entry for host
+			for i in ports:
+				pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
+				reply=sr1(pkt, verbose=0,timeout=time)
+				if (reply is None): # host either down or firewall filtering requests.
+					next
+				elif (str(reply[TCP].flags) == "SA"): # if syn-ack port is open
+					HostPort_dict[host].append(i) # append to current host entry list.
+				elif (str(reply[TCP].flags) == "RA"): # if RA port is closed
+					next
+				else: # is other response assume closed/.
+					next
+			return HostPort_dict # return entire dict.
+
 	#edited from: https://jvns.ca/blog/2013/10/31/day-20-scapy-and-traceroute/
 	#Changed to add timeout , and not break when reply is NONE
 	def icmp_discovery(self, hosts):
@@ -104,6 +122,7 @@ class Pynettop:
 		return ipup, ipdown, trace
 
 
-test = Pynettop("8.8.8.8")
+test = Pynettop("8.8.8.8", time=0.1, ttl=32)
 ipup,ipdown,trace=test.i
+ipup=test.port_scanner(hosts=ipup)
 print(ipup,ipdown,trace)
