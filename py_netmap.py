@@ -90,6 +90,7 @@ class Pynettop:
 					next
 				elif (str(reply[TCP].flags) == "SA"): # if syn-ack port is open
 					HostPort_dict[host].append(i) # append to current host entry list.
+					sr1(IP(dst=host, ttl=ttl)/TCP(dport=i, flags="R"), verbose=0, timeout=0)
 				elif (str(reply[TCP].flags) == "RA"): # if RA port is closed
 					next
 				else: # is other response assume closed/.
@@ -122,7 +123,7 @@ class Pynettop:
 		return ipup, ipdown, trace
 
 
-test = Pynettop("8.8.8.8", time=0.1, ttl=32)
+test = Pynettop("192.168.84.1", time=0.1, ttl=32)
 ipup,ipdown,trace=test.i
 ipup=test.port_scanner(hosts=ipup)
 print(ipup,ipdown,trace)
