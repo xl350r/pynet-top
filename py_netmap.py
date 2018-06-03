@@ -7,7 +7,7 @@ class Pynettop:
 		self.default_ttl=ttl
 		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
-		self.i=self.icmp_discovery(ip)
+		self.start=self.icmp_discovery(ip)
 	## IP list creation
 	## edited for better Python 3 support
 	def ip_range(self, input_string):
@@ -122,8 +122,8 @@ class Pynettop:
 				ipdown.append(i)
 		return ipup, ipdown, trace
 
-
-test = Pynettop("192.168.84.1", time=0.1, ttl=32)
-ipup,ipdown,trace=test.i
-ipup=test.port_scanner(hosts=ipup)
-print(ipup,ipdown,trace)
+if __name__ == '__main__':
+	scan = Pynettop("192.168.84.1", time=0.1, ttl=32)
+	ipup,ipdown,trace=scan.start
+	ipup=scan.port_scanner(hosts=ipup)
+	print(ipup,ipdown,trace)
