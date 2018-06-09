@@ -3,7 +3,7 @@ from scapy.all import *
 
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
-	def __init__(self, host, time=0.1, ttl=32): # time=0.1 0.1 ~= 100ms
+	def __init__(self, host, time=0.1, ttl=32): # time= timeout as float or int, host = array of ip, ttl int time to life.
 		self.default_ttl=ttl
 		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
@@ -12,13 +12,16 @@ class Pynettop:
 	## edited for better Python 3 support
 	def ip_range(self, input_string):
 		octets = input_string.split('.')
+		if 4!=len(octets):
+			print("Error:", input_string, "is an invalid input.")
+			exit(1)
 		chunks = [list(octet.split('-')) for octet in octets]
 		ranges = [range(int(c[0]), int(c[1]) + 1) if len(c) == 2 else c for c in chunks]
 		
 		for address in itertools.product(*ranges):
 			yield '.'.join(map(str, address))
 
-	def trace(self, host):
+	def trace(self, host): # accepts string as host where the string is an IP address.
 		ar = []
 		for i in range(1, self.default_ttl+1): #check each hop to target
 			reply,src=self.test_udp(host, i) 
@@ -78,8 +81,8 @@ class Pynettop:
 				return None, None
 			else:
 				next
-
-	def port_scanner(self, hosts, ports=[20,21,22,53,80,443,8080], time=0.5, ttl=64):
+				# hosts : array of host(s), ports : array of ports. Time : timeout in seconds (float). ttl : time to life (int)
+	def port_scanner(self, hosts, ports=[21,22,53,80,443,1723,8080], time=0.5, ttl=64): 
 		HostPort_dict=dict() #Init variable to store results
 		for host in hosts:
 			HostPort_dict[host]=[] # create blank dict entry for host
@@ -123,7 +126,16 @@ class Pynettop:
 		return ipup, ipdown, trace
 
 if __name__ == '__main__':
-	scan = Pynettop("192.168.84.1", time=0.1, ttl=32)
-	ipup,ipdown,trace=scan.start
-	ipup=scan.port_scanner(hosts=ipup)
-	print(ipup,ipdown,trace)
+	try:
+		scan = Pynettop("8.8.8.8", time=0.1, ttl=32)
+		ipup,ipdown,trace=scan.start
+		ipup=scan.port_scanner(hosts=ipup, ports=[53])
+		print(ipup,ipdown,trace)
+		exit(0)
+	except ValueError as e:
+		raise e
+	except NameError as e:
+		raise e
+	except AttributeError as e:
+		print("Error: Input Is formatted Incorrectly")
+		exit(1)
