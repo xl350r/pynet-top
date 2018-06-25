@@ -7,7 +7,7 @@ class Pynettop:
 		self.default_ttl=ttl
 		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
-		self.start=self.icmp_discovery(ip)
+		self.start=self.discovery(ip)
 	## IP list creation
 	## edited for better Python 3 support
 	def ip_range(self, input_string):
@@ -16,6 +16,14 @@ class Pynettop:
 			print("Error:", input_string, "is an invalid input.")
 			exit(1)
 		chunks = [list(octet.split('-')) for octet in octets]
+		for i in chunks:
+			if len(i) == 2:
+				if int(i[0]) < 0 or int(i[0]) > 255 or int(i[1]) > 255 or int(i[1]) < 0:
+					print("Error: Invalid Ip addressing.", input_string, "  an octet is less than 0 or greater than 255")
+					exit(1) 
+			elif len(i) == 1 and int(i[0]) > 255 or int(i[0]) < 0: 
+				print("Error: Invalid Ip addressing.", input_string, "has an octet is less than 0 or greater than 255")
+				exit(1)
 		ranges = [range(int(c[0]), int(c[1]) + 1) if len(c) == 2 else c for c in chunks]
 		
 		for address in itertools.product(*ranges):
@@ -102,7 +110,7 @@ class Pynettop:
 
 	#edited from: https://jvns.ca/blog/2013/10/31/day-20-scapy-and-traceroute/
 	#Changed to add timeout , and not break when reply is NONE
-	def icmp_discovery(self, hosts):
+	def discovery(self, hosts):
 		if conf.verb != 0:
 			conf.verb=0
 		target_discovered=False #trace() when host a target is found, but only for FIRST.
@@ -110,24 +118,46 @@ class Pynettop:
 		ipdown=[] # record which IPs are down
 		trace =[] # store trace()
 		for i in hosts:
-			print("Checking", i)
-			packet = IP(dst=i, ttl=self.default_ttl) / ICMP() #ICMP style ping.
-			reply = sr1(packet, timeout=1)
+			#print("Checking", i)
+			#packet = IP(dst=i, ttl=self.default_ttl) / ICMP() #ICMP style ping.
+			#reply = sr1(packet, timeout=1)
+			reply,src=self.test_icmp(i, 64)
 			if not (reply is None):
 				if target_discovered == False:
 					target_discovered = True
-					print(i, "is up")
+					#print(i, "is up")
 					ipup.append(i)
 					trace = self.trace(i)
 				else: 
 					ipup.append(i)
+			elif reply is None:
+				reply,src=self.test_udp(i, 64)
+				if reply is None:
+					reply,src = self.test_tcp(i, 64)
+					if not (reply is None):
+						if target_discovered == False:
+							target_discovered = True
+							ipup.append(i)
+							trace=self.trace(i)
+						else:
+							ipup.append(i)
+					else:
+						ipdown.append(i)
+				elif not (reply is None):
+					if target_discovered == False:
+							target_discovered = True
+							ipup.append(i)
+							trace=self.trace(i)
+					else:
+						ipup.append(i)
 			else:
 				ipdown.append(i)
+
 		return ipup, ipdown, trace
 
 if __name__ == '__main__':
 	try:
-		scan = Pynettop("8.8.8.8", time=0.1, ttl=32)
+		scan = Pynettop("8.8.8.1-9", time=0.1, ttl=32)
 		ipup,ipdown,trace=scan.start
 		ipup=scan.port_scanner(hosts=ipup, ports=[53])
 		print(ipup,ipdown,trace)
