@@ -98,15 +98,15 @@ class Pynettop:
 				pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
 				reply=sr1(pkt, verbose=0,timeout=time)
 				if (reply is None): # host either down or firewall filtering requests.
-					next
+					HostPort_dict[host].append(str(i) + " Filtered")
 				elif (str(reply[TCP].flags) == "SA"): # if syn-ack port is open
-					HostPort_dict[host].append(i) # append to current host entry list.
+					HostPort_dict[host].append(str(i)) # append to current host entry list.
 					sr1(IP(dst=host, ttl=ttl)/TCP(dport=i, flags="R"), verbose=0, timeout=0)
 				elif (str(reply[TCP].flags) == "RA"): # if RA port is closed
-					next
+					HostPort_dict[host].append(str(i) + " Closed")
 				else: # is other response assume closed/.
-					next
-			return HostPort_dict # return entire dict.
+					HostPort_dict[host].append(str(i) + " Closed/Filtered")
+		return HostPort_dict # return entire dict.
 
 	#edited from: https://jvns.ca/blog/2013/10/31/day-20-scapy-and-traceroute/
 	#Changed to add timeout , and not break when reply is NONE
@@ -157,9 +157,9 @@ class Pynettop:
 
 if __name__ == '__main__':
 	try:
-		scan = Pynettop("8.8.8.1-9", time=0.1, ttl=32)
+		scan = Pynettop("1.1.1.1-9", time=0.1, ttl=32)
 		ipup,ipdown,trace=scan.start
-		ipup=scan.port_scanner(hosts=ipup, ports=[53])
+		ipup=scan.port_scanner(hosts=ipup)
 		print(ipup,ipdown,trace)
 		exit(0)
 	except ValueError as e:
