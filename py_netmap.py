@@ -12,19 +12,19 @@ class Pynettop:
 	## edited for better Python 3 support
 	def ip_range(self, input_string):
 		octets = input_string.split('.')
-		if 4!=len(octets):
+		if 4!=len(octets): # make sure there are 4 octets.
 			print("Error:", input_string, "is an invalid input.")
 			exit(1)
 		chunks = [list(octet.split('-')) for octet in octets]
 		for i in chunks:
-			if len(i) == 2:
-				if int(i[0]) < 0 or int(i[0]) > 255 or int(i[1]) > 255 or int(i[1]) < 0:
+			if len(i) == 2: # make sure checking both parts of if split by '-'
+				if int(i[0]) < 0 or int(i[0]) > 255 or int(i[1]) > 255 or int(i[1]) < 0: # check if greater than 255 or less than 0
 					print("Error: Invalid Ip addressing.", input_string, "  an octet is less than 0 or greater than 255")
 					exit(1) 
-			elif len(i) == 1 and int(i[0]) > 255 or int(i[0]) < 0: 
+			elif len(i) == 1 and int(i[0]) > 255 or int(i[0]) < 0:  # check if greater than 255 or less than 0
 				print("Error: Invalid Ip addressing.", input_string, "has an octet is less than 0 or greater than 255")
 				exit(1)
-		ranges = [range(int(c[0]), int(c[1]) + 1) if len(c) == 2 else c for c in chunks]
+		ranges = [range(int(c[0]), int(c[1]) + 1) if len(c) == 2 else c for c in chunks] # ternary to generate range.
 		
 		for address in itertools.product(*ranges):
 			yield '.'.join(map(str, address))
@@ -118,9 +118,6 @@ class Pynettop:
 		ipdown=[] # record which IPs are down
 		trace =[] # store trace()
 		for i in hosts:
-			#print("Checking", i)
-			#packet = IP(dst=i, ttl=self.default_ttl) / ICMP() #ICMP style ping.
-			#reply = sr1(packet, timeout=1)
 			reply,src=self.test_icmp(i, 64)
 			if not (reply is None):
 				if target_discovered == False:
@@ -157,10 +154,36 @@ class Pynettop:
 
 if __name__ == '__main__':
 	try:
-		scan = Pynettop("1.1.1.1-9", time=0.1, ttl=32)
+		cnt=0
+		scan = Pynettop("1.1.1.1-4", time=0.1, ttl=32)
 		ipup,ipdown,trace=scan.start
 		ipup=scan.port_scanner(hosts=ipup)
-		print(ipup,ipdown,trace)
+		for ip in ipup:
+			print("\n"+ip)
+			print("port", "\t", "status")
+			for port_status in ipup[ip]:
+				ps = port_status.split(" ")
+				if len(ps) == 2:
+					if len(ps[0]) < 5:
+						print(ps[0]+ (" "*(5-len(ps[0]))), "\t", ps[1])
+					else:
+						print(ps[0], "\t", ps[1])
+				else:
+					if len(ps[0]) < 5:
+						print(ps[0]+ (" "*(5-len(ps[0]))), "\t", "Open")
+					else: 
+						print(ps[0], "\t", "Open")
+		if len(trace) != 0:
+			print("\nTrace Route:")
+			print("Hop", "\t IP")
+			for t in trace:
+				if len(str(cnt+1)) < 3:
+					print(str(cnt+1) + (" "*(3-len(str(cnt+1)))),"\t", t)
+				else:
+					print(str(cnt+1),"\t", t)
+				cnt += 1
+		if len(ipdown) != 0:
+			print(ipdown) 
 		exit(0)
 	except ValueError as e:
 		raise e
