@@ -3,6 +3,8 @@
 A set of functions for CNA python course.
 Uses scapy and itertools.
 
+Author: Daniel C. Hoberecht
+
 ### Pynettop
 encompasing class for functions.
 usage:
