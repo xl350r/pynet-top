@@ -5,6 +5,8 @@ Uses scapy and itertools.
 
 Author: Daniel C. Hoberecht
 
+If you have suggestions or ways I can improve it let me know! I'm always open to learn!
+
 ### Pynettop
 encompasing class for functions.
 usage:
