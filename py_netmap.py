@@ -1,16 +1,15 @@
 import itertools
-from scapy.all import *
-
+from scapy.all import sr1, UDP, TCP, ICMP, IP, conf
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
 	def __init__(self, host, time=0.1, ttl=32): # time= timeout as float or int, host = array of ip, ttl int time to life.
 		self.default_ttl=ttl
 		self.timeout=time
 		ip = [i for i in self.ip_range(host)]
-		self.start=self.discovery(ip)
+		self.start=self.discovery(ip) # edit to return self.discovery(ip)
 	## IP list creation
 	## edited for better Python 3 support
-	def ip_range(self, input_string):
+	def ip_range(self, input_string): # outputs generator save to variable with var = [i for i in ip_range(string)]
 		octets = input_string.split('.')
 		if 4!=len(octets): # make sure there are 4 octets.
 			print("Error:", input_string, "is an invalid input.")
@@ -79,15 +78,15 @@ class Pynettop:
 			return reply.type, reply.src
 
 	def test_tcp(self, host, ttl): # tcp style
-		ports=[20,21,22,53,80,443,8080] # common tcp ports. at least one NEEDS to be open to respond.
+		ports=[20,21,22,53,80,443,1723,8080] # common tcp ports. If respong is SYN+ACK or RST will detect.
 		for i in ports:
 			pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
 			reply = sr1(pkt, verbose=0, timeout=self.timeout)
-			if not (reply is None):
+			if not (reply is None): #looking for ANY reply
 				return True, reply.src
-			elif i == ports[-1]:
+			elif i == ports[-1]: # Break infinite looks
 				return None, None
-			else:
+			else: # If not reply port is filtered,  and moves to next port.
 				next
 				# hosts : array of host(s), ports : array of ports. Time : timeout in seconds (float). ttl : time to life (int)
 	def port_scanner(self, hosts, ports=[21,22,53,80,443,1723,8080], time=0.5, ttl=64): 
@@ -155,7 +154,7 @@ class Pynettop:
 if __name__ == '__main__':
 	try:
 		cnt=0
-		scan = Pynettop("1.1.1.1-4", time=0.1, ttl=32)
+		scan = Pynettop("8.8.8.8", time=0.1, ttl=32)
 		ipup,ipdown,trace=scan.start
 		ipup=scan.port_scanner(hosts=ipup)
 		for ip in ipup:

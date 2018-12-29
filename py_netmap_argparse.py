@@ -1,5 +1,5 @@
 import itertools
-from scapy.all import *
+from scapy.all import sr1, UDP, TCP, ICMP, IP, conf
 import argparse 
 ## https://stackoverflow.com/questions/20525330/python-generate-a-list-of-ip-addresses-from-user-input
 class Pynettop:
@@ -79,15 +79,15 @@ class Pynettop:
 			return reply.type, reply.src
 
 	def test_tcp(self, host, ttl): # tcp style
-		ports=[20,21,22,53,80,443,8080] # common tcp ports. at least one NEEDS to be open to respond.
+		ports=[20,21,22,53,80,443,1723,8080] # common tcp ports. If respond is SYN+ACK or RST will detect.
 		for i in ports:
 			pkt=IP(dst=host, ttl=ttl)/TCP(dport=i)
 			reply = sr1(pkt, verbose=0, timeout=self.timeout)
-			if not (reply is None):
+			if not (reply is None): #looking for ANY reply
 				return True, reply.src
-			elif i == ports[-1]:
+			elif i == ports[-1]: # Break infinite looks
 				return None, None
-			else:
+			else: # If not reply port is filtered,  and moves to next port.
 				next
 				# hosts : array of host(s), ports : array of ports. Time : timeout in seconds (float). ttl : time to life (int)
 	def port_scanner(self, hosts, ports=[21,22,53,80,443,1723,8080], time=0.5, ttl=64): 
